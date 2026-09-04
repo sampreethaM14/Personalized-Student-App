@@ -219,26 +219,27 @@ const LearningHub = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f1115]/50 to-[#0f1115]"></div>
 
         {/* Header Bar */}
-        <div className="relative z-20 flex items-center justify-between border-b border-white/10 bg-[#161920]/80 px-6 py-4 backdrop-blur-md">
+        <div className="relative z-20 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 bg-[#161920]/80 px-4 py-4 backdrop-blur-md sm:px-6">
           <button 
             onClick={() => setSelectedCourseId(null)}
-            className="flex items-center gap-2 rounded-xl border border-white/5 bg-white/5 px-4 py-2 text-sm font-medium text-gray-300 transition-all hover:bg-white/10 hover:text-white"
+            className="flex items-center gap-1.5 rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-sm font-medium text-gray-300 transition-all hover:bg-white/10 hover:text-white sm:gap-2 sm:px-4"
           >
             <ChevronLeft size={18} />
-            Library
+            <span className="hidden sm:inline">Library</span>
+            <span className="sm:hidden">Back</span>
           </button>
           
-          <div className="flex flex-col items-center">
-            <h2 className={`text-xl font-extrabold ${selectedCourse.color}`}>{selectedCourse.title}</h2>
+          <div className="order-3 flex w-full flex-col items-center text-center sm:order-none sm:w-auto">
+            <h2 className={`text-lg font-extrabold sm:text-xl ${selectedCourse.color}`}>{selectedCourse.title}</h2>
             <p className="text-xs text-gray-400">Quest Progress: {progress}%</p>
           </div>
           
-          <div className="flex items-center gap-1.5 hidden sm:flex">
-            <span className="text-xs font-bold text-gray-400 mr-2">{completedCount}/{selectedCourse.topics.length}</span>
+          <div className="hidden items-center gap-1.5 md:flex">
+            <span className="mr-2 text-xs font-bold text-gray-400">{completedCount}/{selectedCourse.topics.length}</span>
             {selectedCourse.topics.map((t, i) => (
               <div 
                 key={i} 
-                className={`h-2 w-8 rounded-full transition-colors duration-500 ${t.completed ? selectedCourse.solidBg : 'bg-gray-800'}`}
+                className={`h-2 w-4 rounded-full transition-colors duration-500 sm:w-6 lg:w-8 ${t.completed ? selectedCourse.solidBg : 'bg-gray-800'}`}
               />
             ))}
           </div>
@@ -247,12 +248,11 @@ const LearningHub = () => {
         {/* Central Timeline Roadmap */}
         <div className="relative z-10 flex flex-1 flex-col py-16 overflow-y-auto">
           
-          {/* Central Line */}
-          <div className="absolute bottom-0 top-12 left-1/2 w-1.5 -translate-x-1/2 rounded-full bg-gray-800/60"></div>
+          {/* Central Line - Left aligned on mobile/tablet, centered on large desktop */}
+          <div className="absolute bottom-0 top-12 left-6 w-1.5 -translate-x-1/2 rounded-full bg-gray-800/60 lg:left-1/2"></div>
           
-          <div className="flex w-full flex-col gap-12 px-4 mx-auto max-w-4xl relative">
+          <div className="mx-auto flex w-full max-w-4xl flex-col gap-12 px-4 relative">
             {selectedCourse.topics.map((topic, index) => {
-              // Dynamic status calculation
               let status = "locked";
               if (topic.completed) {
                 status = "completed";
@@ -264,15 +264,27 @@ const LearningHub = () => {
               const isCompleted = status === "completed";
               const isCurrent = status === "current";
               const isLocked = status === "locked";
-              
               const isEven = index % 2 === 0;
 
               return (
-                <div key={topic.id} className={`w-full flex items-center justify-between ${isEven ? 'flex-row' : 'flex-row-reverse'}`}>
+                <div key={topic.id} className={`relative flex w-full justify-end lg:justify-between ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'}`}>
                   
+                  {/* Empty space for large desktop alternating layout */}
+                  <div className="hidden w-5/12 lg:block"></div>
+
+                  {/* Central Node Indicator */}
+                  <div className="absolute left-6 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center lg:left-1/2 lg:w-2/12">
+                    <div className={`
+                      h-5 w-5 sm:h-6 sm:w-6 rounded-full border-4 border-[#0f1115] transition-all duration-500
+                      ${isCompleted ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.6)]' : ''}
+                      ${isCurrent ? 'bg-amber-500 ring-4 ring-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.8)]' : ''}
+                      ${isLocked ? 'bg-gray-700' : ''}
+                    `}></div>
+                  </div>
+
                   {/* Topic Card Container */}
-                  <div className={`w-5/12 flex ${isEven ? 'justify-end' : 'justify-start'}`}>
-                    <div className="relative group flex items-center gap-4">
+                  <div className={`flex w-[calc(100%-3rem)] sm:w-[calc(100%-4rem)] lg:w-5/12 ${isEven ? 'lg:justify-end' : 'lg:justify-start'}`}>
+                    <div className="relative flex w-full max-w-sm items-center gap-4 sm:w-auto">
                       
                       {/* Interactive Card */}
                       <button 
@@ -280,7 +292,7 @@ const LearningHub = () => {
                         onClick={() => handleTopicClick(topic, status)}
                         title={isLocked ? "Complete previous topics to unlock" : `Learn ${topic.title}`}
                         className={`
-                          relative flex w-64 items-center gap-4 rounded-2xl border px-4 py-3 transition-all duration-300
+                          relative flex w-full sm:w-64 items-center gap-3 sm:gap-4 rounded-2xl border px-3 sm:px-4 py-3 transition-all duration-300
                           ${isCompleted ? 'border-emerald-500/40 bg-[#162a22] shadow-[0_0_20px_rgba(16,185,129,0.1)] hover:bg-[#1a332a]' : ''}
                           ${isCurrent ? 'border-amber-500/60 bg-[#2b2110] shadow-[0_0_25px_rgba(245,158,11,0.25)] hover:bg-[#382b15] hover:-translate-y-1' : ''}
                           ${isLocked ? 'cursor-not-allowed border-gray-800 bg-[#161920] opacity-50' : ''}
@@ -288,22 +300,22 @@ const LearningHub = () => {
                       >
                         {/* Status Icon */}
                         <div className={`
-                          flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors
+                          flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full transition-colors
                           ${isCompleted ? 'bg-emerald-500 text-white' : ''}
                           ${isCurrent ? 'bg-amber-500 text-white animate-pulse' : ''}
                           ${isLocked ? 'bg-gray-800 text-gray-500' : ''}
                         `}>
-                          {isCompleted && <CheckCircle2 size={20} />}
-                          {isCurrent && <Unlock size={18} className="ml-0.5" />}
-                          {isLocked && <Lock size={18} />}
+                          {isCompleted && <CheckCircle2 size={18} className="sm:w-5 sm:h-5" />}
+                          {isCurrent && <Unlock size={16} className="ml-0.5 sm:w-[18px] sm:h-[18px]" />}
+                          {isLocked && <Lock size={16} className="sm:w-[18px] sm:h-[18px]" />}
                         </div>
                         
-                        <div className="flex flex-col items-start text-left">
-                          <span className={`font-bold text-sm ${isLocked ? 'text-gray-500' : 'text-gray-100'}`}>
+                        <div className="flex flex-col items-start text-left overflow-hidden">
+                          <span className={`font-bold text-xs sm:text-sm truncate w-full ${isLocked ? 'text-gray-500' : 'text-gray-100'}`}>
                             {topic.title}
                           </span>
                           {!isLocked && (
-                            <span className="mt-0.5 flex items-center gap-1 text-[10px] uppercase tracking-wider text-gray-400 group-hover:text-gray-200">
+                            <span className="mt-0.5 flex items-center gap-1 text-[9px] sm:text-[10px] uppercase tracking-wider text-gray-400 group-hover:text-gray-200">
                               <ExternalLink size={10} /> Read Concept
                             </span>
                           )}
@@ -315,31 +327,20 @@ const LearningHub = () => {
                         <button
                           onClick={(e) => markTopicComplete(selectedCourse.id, topic.id, e)}
                           className={`
-                            absolute ${isEven ? '-left-14' : '-right-14'} 
-                            flex h-10 w-10 items-center justify-center rounded-full border border-emerald-500/50 
-                            bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)] 
+                            absolute -right-2 -top-3 z-20 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-emerald-500/50 
+                            bg-[#161920] text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)] 
                             transition-all hover:scale-110 hover:bg-emerald-500 hover:text-white
+                            lg:top-1/2 lg:-translate-y-1/2 lg:bg-emerald-500/10
+                            ${isEven ? 'lg:-left-14 lg:right-auto' : 'lg:-right-14 lg:left-auto'}
                           `}
                           title="Mark as completed to unlock next"
                         >
-                          <Check size={20} strokeWidth={3} />
+                          <Check size={18} strokeWidth={3} className="sm:w-5 sm:h-5" />
                         </button>
                       )}
                     </div>
                   </div>
 
-                  {/* Central Node Indicator */}
-                  <div className="w-2/12 flex justify-center z-10 relative">
-                    <div className={`
-                      h-6 w-6 rounded-full border-4 border-[#0f1115] transition-all duration-500
-                      ${isCompleted ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.6)]' : ''}
-                      ${isCurrent ? 'bg-amber-500 ring-4 ring-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.8)]' : ''}
-                      ${isLocked ? 'bg-gray-700' : ''}
-                    `}></div>
-                  </div>
-
-                  {/* Empty space for alternate side layout */}
-                  <div className="w-5/12"></div>
                 </div>
               );
             })}

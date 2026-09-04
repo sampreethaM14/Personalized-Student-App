@@ -13,6 +13,7 @@ import AIAssistant from "./pages/AIAssistant";
 import PlacementPrep from "./pages/PlacementPrep";
 import LearningHub from "./pages/LearningHub";
 import StudyGroups from "./pages/StudyGroups";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
       <Route path="/placement" element={<ProtectedRoute><PlacementPrep /></ProtectedRoute>} />
       <Route path="/learning-hub" element={<ProtectedRoute><LearningHub /></ProtectedRoute>} />
       <Route path="/groups" element={<ProtectedRoute><StudyGroups /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
     </Routes>
   );
 }

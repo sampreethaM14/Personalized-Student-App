@@ -11,7 +11,8 @@ import {
   BriefcaseBusiness,
   Users,
   PanelLeftClose,
-  Menu
+  Menu,
+  UserCircle
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -24,6 +25,7 @@ const NAV_ITEMS = [
   { to: "/learning-hub", label: "Learning Hub", icon: BookOpen },
   { to: "/placement", label: "Placement Prep", icon: BriefcaseBusiness },
   { to: "/groups", label: "Study Groups", icon: Users },
+  { to: "/profile", label: "Profile", icon: UserCircle}
 ];
 
 const Sidebar = ({ isOpen, toggleSidebar, isMobileOpen, closeMobile }) => {
