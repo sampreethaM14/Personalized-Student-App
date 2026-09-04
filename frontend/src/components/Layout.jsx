@@ -1,12 +1,17 @@
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import { Menu } from "lucide-react";
 
 const Layout = ({ title, subtitle, children }) => {
-  // State to manage sidebar visibility
+  // Desktop sidebar state
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
+  // Mobile sidebar state
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+  const toggleMobile = () => setIsMobileOpen((prev) => !prev);
 
   return (
     <div className="min-h-screen bg-app text-primary transition-colors duration-200">
@@ -18,9 +23,48 @@ const Layout = ({ title, subtitle, children }) => {
         Skip to main content
       </a>
 
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      {/* =========================================
+          MOBILE TOP HEADER (Hidden on Desktop)
+          ========================================= */}
+      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border-default bg-surface px-4 py-3 md:hidden">
+        <div className="flex items-center gap-3">
+          <img 
+            src="/logo.png" 
+            alt="Logo" 
+            className="h-8 w-auto rounded-lg object-contain" 
+          />
+          <p className="font-display text-sm font-bold text-primary-text">
+            Personalized Student App
+          </p>
+        </div>
+        
+        <button
+          onClick={toggleMobile}
+          className="rounded-lg p-2 text-secondary transition-colors hover:bg-surface-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+          aria-label="Open menu"
+        >
+          <Menu size={22} />
+        </button>
+      </div>
 
-      {/* Main content wrapper with dynamic margin transition */}
+      {/* MOBILE OVERLAY (Darkens background when open) */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity md:hidden"
+          onClick={toggleMobile}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Sidebar Component */}
+      <Sidebar 
+        isOpen={isSidebarOpen} 
+        toggleSidebar={toggleSidebar}
+        isMobileOpen={isMobileOpen}
+        closeMobile={toggleMobile}
+      />
+
+      {/* Main content wrapper with margin transitions */}
       <div 
         className={`flex min-h-screen flex-1 flex-col transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "md:ml-64" : "md:ml-20"
