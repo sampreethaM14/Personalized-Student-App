@@ -27,6 +27,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUser = (patch) => {
+    // Merges the existing user data (like the JWT token) with the newly updated fields
     const next = { ...user, ...patch };
     persist(next);
   };

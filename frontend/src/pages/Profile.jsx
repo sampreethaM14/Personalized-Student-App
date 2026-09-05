@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import { 
   User, 
@@ -13,14 +13,21 @@ import {
   Sparkles,
   ShieldCheck
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import api from "../api/axios";
 
 const Profile = () => {
-  const [isEditing, setIsEditing] = useState(false);
+  // Pull updateUser instead of setUser from context
+  const { user, updateUser } = useAuth();
   
-  // Mock state based STRICTLY on your Mongoose User Schema.
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
   const [profile, setProfile] = useState({
-    name: "Abdul Wahab S",
-    email: "abdul@gmail.com", 
+    name: "",
+    email: "", 
     role: "student",
     academicGoal: "", 
     careerInterest: "",
@@ -29,20 +36,73 @@ const Profile = () => {
 
   const [formData, setFormData] = useState({ ...profile });
 
+  useEffect(() => {
+    if (user) {
+      const userData = {
+        name: user.name || "",
+        email: user.email || "",
+        role: user.role || "student",
+        academicGoal: user.academicGoal || "",
+        careerInterest: user.careerInterest || "",
+        interests: user.interests && Array.isArray(user.interests) 
+          ? user.interests.join(", ") 
+          : "",
+      };
+      setProfile(userData);
+      setFormData(userData);
+    }
+  }, [user]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (error) setError("");
+    if (success) setSuccess("");
   };
 
-  const handleSave = () => {
-    setProfile({ ...formData });
-    setIsEditing(false);
+  const handleSave = async () => {
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const updatePayload = {
+        name: formData.name,
+        academicGoal: formData.academicGoal,
+        careerInterest: formData.careerInterest,
+        interests: formData.interests
+          .split(",")
+          .map((i) => i.trim())
+          .filter((i) => i !== ""),
+      };
+
+      const { data } = await api.put("/auth/profile", updatePayload);
+
+      setProfile({ ...formData });
+      setIsEditing(false);
+      setSuccess("Profile updated successfully!");
+
+      // Update global context AND local storage simultaneously
+      if (updateUser && data.user) {
+        updateUser(data.user);
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Failed to update profile. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
     setFormData({ ...profile });
     setIsEditing(false);
+    setError("");
+    setSuccess("");
   };
+
+  if (!user) return null;
 
   return (
     <Layout 
@@ -56,7 +116,7 @@ const Profile = () => {
             <div className="card flex flex-col items-center text-center">
               <div className="relative mb-4">
                 <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary text-3xl font-bold text-white shadow-lg">
-                  {profile.name.charAt(0)}
+                  {profile.name ? profile.name.charAt(0).toUpperCase() : "U"}
                 </div>
               </div>
               
@@ -102,21 +162,41 @@ const Profile = () => {
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={handleCancel}
-                    className="btn-ghost flex items-center gap-1.5 px-3 py-1.5 text-xs"
+                    disabled={loading}
+                    className="btn-ghost flex items-center gap-1.5 px-3 py-1.5 text-xs disabled:opacity-50"
                   >
                     <X size={14} />
                     Cancel
                   </button>
                   <button 
                     onClick={handleSave}
-                    className="btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs"
+                    disabled={loading}
+                    className="btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs disabled:opacity-50"
                   >
-                    <Check size={14} />
-                    Save
+                    {loading ? (
+                      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    ) : (
+                      <Check size={14} />
+                    )}
+                    {loading ? "Saving..." : "Save"}
                   </button>
                 </div>
               )}
             </div>
+
+            {error && (
+              <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
+                <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-red-500" />
+                <p>{error}</p>
+              </div>
+            )}
+
+            {success && (
+              <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-3 text-sm text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300">
+                <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+                <p>{success}</p>
+              </div>
+            )}
 
             <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
               

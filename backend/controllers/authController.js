@@ -63,17 +63,42 @@ const getProfile = async (req, res) => {
 // @desc  Update profile / personalisation signals
 // @route PUT /api/auth/me
 const updateProfile = async (req, res) => {
-  const user = await User.findById(req.user._id);
-  if (!user) return res.status(404).json({ message: "User not found" });
+  try {
+    const { name, academicGoal, careerInterest, interests } = req.body;
 
-  const { name, academicGoal, careerInterest, interests } = req.body;
-  if (name !== undefined) user.name = name;
-  if (academicGoal !== undefined) user.academicGoal = academicGoal;
-  if (careerInterest !== undefined) user.careerInterest = careerInterest;
-  if (interests !== undefined) user.interests = interests;
+    const user = await User.findById(req.user.id);
 
-  const updated = await user.save();
-  res.json(updated);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update the fields
+    user.name = name || user.name;
+    user.academicGoal = academicGoal || user.academicGoal;
+    user.careerInterest = careerInterest || user.careerInterest;
+    
+    if (interests) {
+      user.interests = interests;
+    }
+
+    const updatedUser = await user.save();
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        academicGoal: updatedUser.academicGoal,
+        careerInterest: updatedUser.careerInterest,
+        interests: updatedUser.interests,
+      },
+    });
+  } catch (error) {
+    console.error("Profile update error:", error);
+    res.status(500).json({ message: "Failed to update profile" });
+  }
 };
 
 module.exports = { registerUser, loginUser, getProfile, updateProfile };
